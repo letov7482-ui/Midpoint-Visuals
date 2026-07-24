@@ -1,12 +1,10 @@
 buildscript {
     repositories {
-        // ИСПРАВЛЕНО: Указан точный и рабочий Maven-путь Fabric
         maven { url = "https://maven.fabricmc.net/" }
         maven { url = "https://maven.terraformersmc.com/" } 
         mavenCentral()
     }
     dependencies {
-        // ИСПРАВЛЕНО: Используется стабильный релиз 1.7.4 вместо нестабильного SNAPSHOT
         classpath "net.fabricmc:fabric-loom:1.7.4"
     }
 }
@@ -25,7 +23,7 @@ repositories {
     mavenCentral()
     maven { url = "https://maven.fabricmc.net/" }
     maven { url = "https://maven.terraformersmc.com/" } 
-    maven { url = "https://minecraft.net" }
+    maven { url = "https://libraries.minecraft.net/" }
 }
 
 dependencies {
@@ -34,7 +32,9 @@ dependencies {
     
     modImplementation "net.fabricmc:fabric-loader:0.16.9"
     modImplementation "net.fabricmc.fabric-api:fabric-api:0.115.0+1.21.4"
-    modImplementation "com.terraformersmc:modmenu:13.0.0-beta.1"
+    
+    // ИСПРАВЛЕНО: Изменена версия modmenu на существующую 12.0.0 для Minecraft 1.21.4
+    modImplementation "com.terraformersmc:modmenu:12.0.0"
 }
 
 processResources {
