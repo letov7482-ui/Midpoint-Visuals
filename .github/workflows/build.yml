@@ -1,75 +1,29 @@
-name: Build Midpoint Visuals
+nname: Build
 
 on:
   push:
-    branches: [ "**" ]
-  pull_request:
-    branches: [ "**" ]
-  workflow_dispatch:
+    branches:
+      - main
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Auto-unzip any archive found in the repo
-        run: |
-          echo "Ищу zip-архивы в репозитории..."
-          ZIP_FILES=$(find . -maxdepth 4 -iname '*.zip' -not -path '*/.git/*')
-
-          if [ -z "$ZIP_FILES" ]; then
-            echo "Zip-архивов не найдено, пропускаю распаковку."
-          else
-            echo "Найдены архивы:"
-            echo "$ZIP_FILES"
-            while IFS= read -r ZIP; do
-              DEST_DIR=$(dirname "$ZIP")
-              echo "Распаковываю: $ZIP -> $DEST_DIR"
-              unzip -o "$ZIP" -d "$DEST_DIR"
-            done <<< "$ZIP_FILES"
-          fi
-
-      - name: Locate build.gradle directory
-        id: locate
-        run: |
-          echo "Содержимое репозитория после распаковки:"
-          find . -maxdepth 5 -not -path '*/.git/*' | sort
-
-          FOUND=$(find . -maxdepth 5 -name 'build.gradle' -not -path '*/.git/*' | head -n 1)
-
-          if [ -z "$FOUND" ]; then
-            echo "::error::build.gradle не найден в репозитории даже после распаковки всех zip-архивов."
-            echo "Проверьте, что архив действительно содержит папку с build.gradle внутри."
-            exit 1
-          fi
-
-          PROJECT_DIR=$(dirname "$FOUND")
-          echo "Проект найден в: $PROJECT_DIR"
-          echo "project_dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '21'
+          distribution: temurin
+          java-version: 21
+          cache: gradle
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x gradlew
+
+      - run: ./gradlew build
+
+      - uses: actions/upload-artifact@v4
         with:
-          gradle-version: '8.12'
-
-      - name: Build with Gradle
-        working-directory: ${{ steps.locate.outputs.project_dir }}
-        run: gradle build --stacktrace
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: midpoint-visuals-jar
-          path: ${{ steps.locate.outputs.project_dir }}/build/libs/*.jar
-          if-no-files-found: error
+          name: MidpointVisuals
+          path: build/libs/*.jar
