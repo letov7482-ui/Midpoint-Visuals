@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "net.midpoint.visuals.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "HurtColorMixin",
+    "AutoSprintMixin",
+    "CPvPOptimizerMixin",
+    "BlockHighlightMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+
