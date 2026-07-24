@@ -1,0 +1,80 @@
+plugins {
+    id 'fabric-loom' version '1.8'
+    id 'java'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+minecraft {
+    mappings { 
+        version = project.minecraft_version + "+" + project.yarn_mappings
+    }
+    accessWidenerPath = file("src/main/resources/midpoint_visuals.accesswidener")
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://maven.fabricmc.net/" }
+    maven { url "https://maven.shedaniel.me/" }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    modImplementation "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
+    include "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
+    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = "UTF-8"
+    it.options.release = 21
+}
+
+jar {
+    from("LICENSE") {
+        rename { "LICENSE_${base.archivesName}.txt" }
+    }
+}
+
+// configure the sources jar
+tasks.register("sourcesJar", Jar) {
+    classifier = "sources"
+    from sourceSets.main.allSource
+}
+
+// configure the javadoc jar
+tasks.register("javadocJar", Jar) {
+    classifier = "javadoc"
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives tasks.sourcesJar
+    archives tasks.javadocJar
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
