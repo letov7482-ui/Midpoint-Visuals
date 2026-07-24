@@ -17,19 +17,38 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Unzip project archive
+      - name: Auto-unzip any archive found in the repo
         run: |
-          if [ -f "midpoint-visuals.zip" ]; then
-            echo "Найден midpoint-visuals.zip, распаковываю..."
-            unzip -o midpoint-visuals.zip -d .
+          echo "Ищу zip-архивы в репозитории..."
+          ZIP_FILES=$(find . -maxdepth 4 -iname '*.zip' -not -path '*/.git/*')
+
+          if [ -z "$ZIP_FILES" ]; then
+            echo "Zip-архивов не найдено, пропускаю распаковку."
           else
-            echo "midpoint-visuals.zip не найден в корне репозитория, пропускаю распаковку."
+            echo "Найдены архивы:"
+            echo "$ZIP_FILES"
+            while IFS= read -r ZIP; do
+              DEST_DIR=$(dirname "$ZIP")
+              echo "Распаковываю: $ZIP -> $DEST_DIR"
+              unzip -o "$ZIP" -d "$DEST_DIR"
+            done <<< "$ZIP_FILES"
           fi
 
       - name: Locate build.gradle directory
         id: locate
         run: |
-          PROJECT_DIR=$(dirname "$(find . -maxdepth 4 -name 'build.gradle' | head -n 1)")
+          echo "Содержимое репозитория после распаковки:"
+          find . -maxdepth 5 -not -path '*/.git/*' | sort
+
+          FOUND=$(find . -maxdepth 5 -name 'build.gradle' -not -path '*/.git/*' | head -n 1)
+
+          if [ -z "$FOUND" ]; then
+            echo "::error::build.gradle не найден в репозитории даже после распаковки всех zip-архивов."
+            echo "Проверьте, что архив действительно содержит папку с build.gradle внутри."
+            exit 1
+          fi
+
+          PROJECT_DIR=$(dirname "$FOUND")
           echo "Проект найден в: $PROJECT_DIR"
           echo "project_dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
 
