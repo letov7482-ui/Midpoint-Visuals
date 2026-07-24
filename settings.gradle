@@ -1,8 +1,11 @@
 pluginManagement {
     repositories {
-        maven { url = "https://fabricmc.net" } // Главный репозиторий Fabric
-        mavenCentral()
+        maven { 
+            name = "Fabric"
+            url = "https://fabricmc.net" 
+        }
         gradlePluginPortal()
+        mavenCentral()
     }
 }
 
@@ -10,7 +13,14 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         mavenCentral()
-        maven { url = "https://fabricmc.net" }
+        maven { 
+            name = "Fabric"
+            url = "https://fabricmc.net" 
+        }
+        maven { 
+            name = "TerraformersMC"
+            url = "https://terraformersmc.com" 
+        }
     }
 }
 
