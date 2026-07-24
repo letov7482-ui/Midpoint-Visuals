@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        maven { url = "https://maven.fabricmc.net/" } // Исправленный точный адрес
+        maven { url = "https://maven.fabricmc.net/" }
         mavenCentral()
     }
     dependencies {
@@ -18,10 +18,12 @@ base {
     archivesName = 'midpoint_visuals'
 }
 
+// Прямое указание репозиториев для скачивания библиотек Майнкрафта и Фабрика
 repositories {
     mavenCentral()
-    maven { url = "https://maven.fabricmc.net/" }
-    maven { url = "https://terraformersmc.com" }
+    maven { url = "https://maven.fabricmc.net/" } // Для маппингов и Intermediary
+    maven { url = "https://terraformersmc.com" } // Для ModMenu
+    maven { url = "https://minecraft.net" } // Для официальных файлов Mojang
 }
 
 dependencies {
