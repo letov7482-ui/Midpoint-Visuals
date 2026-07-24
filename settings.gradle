@@ -1,15 +1,6 @@
 pluginManagement {
     repositories {
-        gradlePluginPortal()
-        maven {
-            name = "Fabric"
-            url = "https://maven.fabricmc.net/"
-        }
+        maven { url = "https://fabricmc.net" }
+        mavenCentral()
     }
 }
-
-plugins {
-    id "fabric-loom" version "1.8"
-}
-
-rootProject.name = "midpoint_visuals"
