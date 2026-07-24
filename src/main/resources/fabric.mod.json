@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "midpoint_visuals",
+  "version": "${version}",
+  "name": "Midpoint Visuals",
+  "description": "Next-Gen PvP Performance & Visuals optimized for Mobile & PC.",
+  "authors": [
+    "Midpoint"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "net.midpoint.visuals.MidpointVisuals"
+    ]
+  },
+  "mixins": [
+    "midpoint_visuals.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.9",
+    "minecraft": "1.21.4",
+    "java": ">=21"
+  }
+}
+
