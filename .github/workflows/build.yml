@@ -1,73 +1,44 @@
-name: Build Mod
+name: Build Midpoint Visuals
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
   pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
+    branches: [ "main", "master" ]
+  workflow_dispatch:   # можно вручную запустить
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Unpack mod source archive
-        run: |
-          if [ -f "midpoint_visuals.zip" ]; then
-            echo "Found midpoint_visuals.zip, extracting..."
-            unzip -o midpoint_visuals.zip -d .
-          else
-            echo "No midpoint_visuals.zip found, assuming source is already unpacked in repo."
-          fi
-
-      - name: Locate project root
-        id: locate
-        run: |
-          if [ -f "midpoint_visuals/build.gradle" ]; then
-            echo "dir=midpoint_visuals" >> "$GITHUB_OUTPUT"
-          elif [ -f "build.gradle" ]; then
-            echo "dir=." >> "$GITHUB_OUTPUT"
-          else
-            echo "Could not find build.gradle" >&2
-            exit 1
-          fi
-
-      - name: Set up JDK 21
+      - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: 'gradle'
 
-      - name: Grant execute permission for gradlew
-        working-directory: ${{ steps.locate.outputs.dir }}
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Unzip project if needed (or run from root)
         run: |
-          if [ ! -f "gradlew" ]; then
-            echo "No gradlew found, generating wrapper..."
-            gradle wrapper --gradle-version 8.10
+          if [ -f midpoint_visuals.zip ]; then
+            echo "ZIP found, extracting..."
+            unzip midpoint_visuals.zip -d midpoint_visuals
+            cd midpoint_visuals
+          elif [ -d midpoint_visuals ]; then
+            cd midpoint_visuals
+          else
+            echo "Project files are already in root."
           fi
-          chmod +x gradlew
 
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
+          ls -la
 
-      - name: Build with Gradle
-        working-directory: ${{ steps.locate.outputs.dir }}
-        run: ./gradlew build --stacktrace
-
-      - name: Upload built mod jar
-        uses: actions/upload-artifact@v4
-        with:
-          name: midpoint-visuals-jar
-          path: ${{ steps.locate.outputs.dir }}/build/libs/*.jar
-          if-no-files-found: error
+      - name: Build
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build --warning-mode all
