@@ -7,38 +7,76 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
+env:
+  # Каталог проекта внутри репозитория. Если в репозитории лежит только
+  # midpoint_visuals.zip, он будет распакован в эту же папку.
+  PROJECT_DIR: midpoint_visuals
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      - name: Unpack project archive (if present)
+        run: |
+          set -euo pipefail
+
+          if [ -f "midpoint_visuals.zip" ]; then
+            echo "ZIP найден, распаковываю в '${PROJECT_DIR}'..."
+            unzip -o -q midpoint_visuals.zip -d .
+          elif [ -d "${PROJECT_DIR}" ]; then
+            echo "ZIP не найден, но папка '${PROJECT_DIR}' уже есть в репозитории — использую её."
+          else
+            echo "::error::Не найден ни midpoint_visuals.zip, ни папка '${PROJECT_DIR}' в репозитории."
+            exit 1
+          fi
+
+          if [ ! -d "${PROJECT_DIR}" ]; then
+            echo "::error::После распаковки папка '${PROJECT_DIR}' всё ещё отсутствует."
+            exit 1
+          fi
+
+          if [ ! -f "${PROJECT_DIR}/gradlew" ]; then
+            echo "::error::В '${PROJECT_DIR}' отсутствует gradlew — проверьте содержимое архива."
+            exit 1
+          fi
+
+          echo "Содержимое ${PROJECT_DIR}:"
+          ls -la "${PROJECT_DIR}"
+
+      # gradle/actions/wrapper-validation@v4 намеренно не используется: он ищет
+      # файлы Gradle от корня репозитория и не видит их внутри подпапки
+      # midpoint_visuals/, из-за чего сборка падала с "No file ... matched".
+      # Вместо него выше есть явная проверка наличия gradlew после распаковки.
 
       - name: Setup Java 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: 'gradle'   # ускоряет сборку
+          cache: 'gradle'
 
-      - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@v4
-
-      - name: Unzip if needed (or run from root)
-        run: |
-          if [ -f midpoint_visuals.zip ]; then
-            echo "ZIP found, extracting..."
-            unzip -o midpoint_visuals.zip -d midpoint_visuals
-            cd midpoint_visuals
-          elif [ -d midpoint_visuals ]; then
-            cd midpoint_visuals
-          else
-            echo "Project files are already in root."
-          fi
-
-          ls -la
+      - name: Make gradlew executable
+        run: chmod +x "${PROJECT_DIR}/gradlew"
 
       - name: Build
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: ./gradlew build --warning-mode all --stacktrace
+
+      - name: Show built JAR path
+        working-directory: ${{ env.PROJECT_DIR }}
         run: |
-          chmod +x ./gradlew
-          ./gradlew build --warning-mode all
+          set -euo pipefail
+          echo "Собранные JAR-файлы:"
+          find build/libs -maxdepth 1 -name "*.jar" -print
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: midpoint-visuals-build
+          path: ${{ env.PROJECT_DIR }}/build/libs/*.jar
+          if-no-files-found: warn
