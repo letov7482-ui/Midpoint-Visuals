@@ -7,7 +7,9 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    // Меняем строгий FAIL_ON_PROJECT_REPOS на компромиссный PREFER_SETTINGS, 
+    // чтобы дать Fabric Loom право создавать локальные репозитории маппингов
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         mavenCentral()
         maven { url = "https://fabricmc.net" }
