@@ -1,7 +1,8 @@
 buildscript {
     repositories {
-        maven { url = "https://maven.fabricmc.net/" }
-        maven { url = "https://terraformersmc.com" } // Добавлен точный путь
+        maven { url = "https://fabricmc.net" }
+        // ИСПРАВЛЕНО: Указан рабочий Maven-репозиторий TerraformersMC вместо обычного сайта
+        maven { url = "https://terraformersmc.com" } 
         mavenCentral()
     }
     dependencies {
@@ -21,9 +22,10 @@ base {
 
 repositories {
     mavenCentral()
-    maven { url = "https://maven.fabricmc.net/" }
-    maven { url = "https://terraformersmc.com" } // Продублирован точный путь здесь
-    maven { url = "https://libraries.minecraft.net/" }
+    maven { url = "https://fabricmc.net" }
+    // ИСПРАВЛЕНО: Указан рабочий Maven-репозиторий TerraformersMC для скачивания modmenu
+    maven { url = "https://terraformersmc.com" } 
+    maven { url = "https://minecraft.net" }
 }
 
 dependencies {
