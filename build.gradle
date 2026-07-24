@@ -22,7 +22,13 @@ base {
 repositories {
     mavenCentral()
     maven { url = "https://maven.fabricmc.net/" }
+    
+    // Репозиторий релизов TerraformersMC
     maven { url = "https://maven.terraformersmc.com/" } 
+    
+    // ИСПРАВЛЕНО: Добавлен snapshot-репозиторий TerraformersMC для скачивания бета-версий мода
+    maven { url = "https://terraformersmc.com" } 
+    
     maven { url = "https://libraries.minecraft.net/" }
 }
 
@@ -33,7 +39,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:0.16.9"
     modImplementation "net.fabricmc.fabric-api:fabric-api:0.115.0+1.21.4"
     
-    // ИСПРАВЛЕНО: Указана точная существующая бета-версия для 1.21.4
+    // Эта зависимость теперь будет успешно скачана из snapshot-репозитория
     modImplementation "com.terraformersmc:modmenu:12.0.0-beta.1"
 }
 
