@@ -1,0 +1,29 @@
+name: Auto Unzip Midpoint Visuals
+
+on:
+  push:
+    paths: ['**/midpoint-visuals-fixed-applied.zip']
+  pull_request:
+    paths: ['**/midpoint-visuals-fixed-applied.zip']
+  workflow_dispatch:
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download ZIP
+        run: |
+          curl -L -o midpoint-visuals-fixed-applied.zip \
+            https://github.com/\( {{ github.repository }}/releases/download/ \){{ github.ref_name }}/midpoint-visuals-fixed-applied.zip
+
+      - name: Unzip
+        run: |
+          unzip midpoint-visuals-fixed-applied.zip -d midpoint-visuals
+          rm midpoint-visuals-fixed-applied.zip
+
+      - name: Build
+        working-directory: midpoint-visuals
+        run: ./gradlew clean build --stacktrace
