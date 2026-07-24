@@ -1,7 +1,7 @@
 buildscript {
     repositories {
         maven { url = "https://maven.fabricmc.net/" }
-        maven { url = "https://terraformersmc.com" } // Добавлено сюда
+        maven { url = "https://maven.terraformersmc.com/" }
         mavenCentral()
     }
     dependencies {
@@ -22,7 +22,8 @@ base {
 repositories {
     mavenCentral()
     maven { url = "https://maven.fabricmc.net/" }
-    maven { url = "https://terraformersmc.com" } // И продублировано сюда
+    // Прямой, официальный репозиторий Terraformers для загрузки ModMenu
+    maven { url = "https://maven.terraformersmc.com/" } 
     maven { url = "https://libraries.minecraft.net/" }
 }
 
