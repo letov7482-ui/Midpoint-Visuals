@@ -19,15 +19,16 @@ jobs:
         java-version: '21'
         distribution: 'microsoft'
 
-    # Сбрасываем старый сломанный кэш и ставим стабильный Gradle 8.10
-    - name: Setup Gradle 8.10
-      uses: gradle/actions/setup-gradle@v4
-      with:
-        gradle-version: 8.10
-        cache-disabled: true
+    # Скачиваем чистый дистрибутив Gradle 8.10
+    - name: Download Manual Gradle 8.10
+      run: |
+        wget -q https://gradle.org
+        sudo unzip -q gradle-8.10-bin.zip -d /opt
 
-    - name: Build Mod with Gradle
-      run: gradle build --no-daemon
+    # Принудительно запускаем компиляцию в обход глобальных переменных окружения GitHub
+    - name: Isolated Mod Build
+      run: |
+        /opt/gradle-8.10/bin/gradle build --no-daemon -I /dev/null --no-build-cache
 
     - name: Upload Compiled Jar Artifact
       uses: actions/upload-artifact@v4
