@@ -1,0 +1,51 @@
+package net.midpoint.visuals;
+
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.midpoint.visuals.config.ConfigManager;
+import net.midpoint.visuals.gui.MidpointGuiScreen;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import org.lwjgl.glfw.GLFW;
+
+public class MidpointVisuals implements ClientModInitializer {
+    public static final String MOD_ID = "midpoint_visuals";
+    
+    public static KeyMapping openGuiKey;
+    public static KeyMapping chatBindKey;
+
+    @Override
+    public void onInitializeClient() {
+        // Загружаем настройки конфигурации (все по умолчанию выключено)
+        ConfigManager.loadConfig();
+
+        // Регистрируем клавиши управления
+        openGuiKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.midpoint_visuals.open_gui",
+                GLFW.GLFW_KEY_RIGHT_SHIFT,
+                "category.midpoint_visuals.main"
+        ));
+
+        chatBindKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.midpoint_visuals.chat_bind",
+                GLFW.GLFW_KEY_B,
+                "category.midpoint_visuals.main"
+        ));
+
+        // Обработка нажатий каждый тик клиента
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (client.player == null) return;
+
+            // Открытие черного GUI меню
+            if (openGuiKey.consumeClick()) {
+                client.setScreen(new MidpointGuiScreen());
+            }
+
+            // Текстовый бинд на клавишу B (отправка "gg" в чат)
+            if (ConfigManager.utilityBindEnabled && chatBindKey.consumeClick()) {
+                client.player.connection.sendChat("gg");
+            }
+        });
+    }
+}
