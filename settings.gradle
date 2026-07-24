@@ -1,6 +1,17 @@
 pluginManagement {
     repositories {
-        maven { url = "https://fabricmc.net" }
+        maven { url = "https://fabricmc.net" } // Главный репозиторий Fabric
         mavenCentral()
+        gradlePluginPortal()
     }
 }
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenCentral()
+        maven { url = "https://fabricmc.net" }
+    }
+}
+
+rootProject.name = 'midpoint_visuals'
