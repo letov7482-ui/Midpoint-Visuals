@@ -1,12 +1,13 @@
 buildscript {
     repositories {
-        maven { url = "https://fabricmc.net" }
-        // ИСПРАВЛЕНО: Указан рабочий Maven-репозиторий TerraformersMC вместо обычного сайта
-        maven { url = "https://terraformersmc.com" } 
+        // ИСПРАВЛЕНО: Указан точный и рабочий Maven-путь Fabric
+        maven { url = "https://maven.fabricmc.net/" }
+        maven { url = "https://maven.terraformersmc.com/" } 
         mavenCentral()
     }
     dependencies {
-        classpath "net.fabricmc:fabric-loom:1.7-SNAPSHOT"
+        // ИСПРАВЛЕНО: Используется стабильный релиз 1.7.4 вместо нестабильного SNAPSHOT
+        classpath "net.fabricmc:fabric-loom:1.7.4"
     }
 }
 
@@ -22,9 +23,8 @@ base {
 
 repositories {
     mavenCentral()
-    maven { url = "https://fabricmc.net" }
-    // ИСПРАВЛЕНО: Указан рабочий Maven-репозиторий TerraformersMC для скачивания modmenu
-    maven { url = "https://terraformersmc.com" } 
+    maven { url = "https://maven.fabricmc.net/" }
+    maven { url = "https://maven.terraformersmc.com/" } 
     maven { url = "https://minecraft.net" }
 }
 
