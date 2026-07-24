@@ -1,29 +1,53 @@
-nname: Build
+plugins {
+    id 'fabric-loom' version '1.9-SNAPSHOT'
+    id 'maven-publish'
+}
 
-on:
-  push:
-    branches:
-      - main
-      - master
+version = '1.0.0'
+group = 'net.midpoint.visuals'
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+base {
+    archivesName = 'midpoint_visuals'
+}
 
-    steps:
-      - uses: actions/checkout@v4
+repositories {
+    maven { url = "https://terraformersmc.com" } // Для ModMenu
+}
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-          cache: gradle
+dependencies {
+    minecraft "com.mojang:minecraft:1.21.4"
+    mappings lobster.mojang {
+        officialMojangMappings()
+    }
+    modImplementation "net.fabricmc:fabric-loader:0.16.9"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.115.0+1.21.4"
+    
+    // Поддержка ModMenu для открытия нашего GUI
+    modImplementation "com.terraformersmc:modmenu:13.0.0-beta.1"
+}
 
-      - run: chmod +x gradlew
+processResources {
+    inputs.property "version", project.version
+    filteringCharset "UTF-8"
 
-      - run: ./gradlew build
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: MidpointVisuals
-          path: build/libs/*.jar
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.base.archivesName.get()}"}
+    }
+}
+
