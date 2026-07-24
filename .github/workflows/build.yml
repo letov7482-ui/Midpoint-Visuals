@@ -5,7 +5,7 @@ on:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
-  workflow_dispatch:   # можно вручную запустить
+  workflow_dispatch:
 
 jobs:
   build:
@@ -19,16 +19,16 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: 'gradle'
+          cache: 'gradle'   # ускоряет сборку
 
       - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@v4
 
-      - name: Unzip project if needed (or run from root)
+      - name: Unzip if needed (or run from root)
         run: |
           if [ -f midpoint_visuals.zip ]; then
             echo "ZIP found, extracting..."
-            unzip midpoint_visuals.zip -d midpoint_visuals
+            unzip -o midpoint_visuals.zip -d midpoint_visuals
             cd midpoint_visuals
           elif [ -d midpoint_visuals ]; then
             cd midpoint_visuals
