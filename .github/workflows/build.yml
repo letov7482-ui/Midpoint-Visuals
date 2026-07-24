@@ -13,22 +13,23 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    # 1. Официально устанавливаем JDK 21
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'microsoft'
 
-    # Скачиваем чистый дистрибутив Gradle 8.10
-    - name: Download Manual Gradle 8.10
-      run: |
-        wget -q https://gradle.org
-        sudo unzip -q gradle-8.10-bin.zip -d /opt
+    # 2. Принудительно разворачиваем чистый Gradle 8.10 через сертифицированный шаг GitHub
+    - name: Setup Gradle 8.10
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: '8.10'
+        cache-disabled: true # Стирает ломающие старые остатки версий
 
-    # Принудительно запускаем компиляцию в обход глобальных переменных окружения GitHub
-    - name: Isolated Mod Build
-      run: |
-        /opt/gradle-8.10/bin/gradle build --no-daemon -I /dev/null --no-build-cache
+    # 3. Запускаем сборку
+    - name: Build Mod with Clean Environment
+      run: gradle build --no-daemon
 
     - name: Upload Compiled Jar Artifact
       uses: actions/upload-artifact@v4
