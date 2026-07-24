@@ -13,27 +13,42 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # 1. Официально устанавливаем JDK 21
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'microsoft'
 
-    # 2. Принудительно разворачиваем чистый Gradle 8.10 через сертифицированный шаг GitHub
+    # Принудительно разворачиваем чистый Gradle 8.10
     - name: Setup Gradle 8.10
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: '8.10'
-        cache-disabled: true # Стирает ломающие старые остатки версий
+        cache-disabled: true
 
-    # 3. Запускаем сборку
+    # Силовое создание правильного settings.gradle прямо на сервере перед сборкой
+    - name: Force Apply Repositories
+      run: |
+        cat << 'EOF' > settings.gradle
+        pluginManagement {
+            repositories {
+                maven { url = "https://fabricmc.net" }
+                gradlePluginPortal()
+                mavenCentral()
+            }
+        }
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+                mavenCentral()
+                maven { url = "https://fabricmc.net" }
+                maven { url = "https://terraformersmc.com" }
+            }
+        }
+        rootProject.name = 'midpoint_visuals'
+        EOF
+
+    # Запускаем финальную сборку мода
     - name: Build Mod with Clean Environment
       run: gradle build --no-daemon
-
-    - name: Upload Compiled Jar Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Midpoint-Visuals-Jar
-        path: build/libs/*.jar
-        
+      
