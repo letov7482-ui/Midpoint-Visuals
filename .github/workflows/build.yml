@@ -19,11 +19,12 @@ jobs:
         java-version: '21'
         distribution: 'microsoft'
 
-    # Принудительно устанавливаем стабильную версию Gradle 8.10 для работы с Java 21
+    # Сбрасываем старый сломанный кэш и ставим стабильный Gradle 8.10
     - name: Setup Gradle 8.10
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: 8.10
+        cache-disabled: true
 
     - name: Build Mod with Gradle
       run: gradle build --no-daemon
