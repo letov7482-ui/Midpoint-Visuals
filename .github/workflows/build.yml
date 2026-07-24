@@ -29,7 +29,7 @@ jobs:
       - name: Locate build.gradle directory
         id: locate
         run: |
-          PROJECT_DIR=$(dirname "$(find . -maxdepth 3 -name 'build.gradle' | head -n 1)")
+          PROJECT_DIR=$(dirname "$(find . -maxdepth 4 -name 'build.gradle' | head -n 1)")
           echo "Проект найден в: $PROJECT_DIR"
           echo "project_dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
 
@@ -42,7 +42,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.10'
+          # fabric-loom 1.9-SNAPSHOT требует Gradle >= 8.11, поэтому 8.12
+          # (с небольшим запасом, а не впритык к минимуму).
+          gradle-version: '8.12'
 
       - name: Build with Gradle
         working-directory: ${{ steps.locate.outputs.project_dir }}
