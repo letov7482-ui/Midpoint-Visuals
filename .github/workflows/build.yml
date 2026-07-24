@@ -8,8 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  # Каталог проекта внутри репозитория. Если в репозитории лежит только
-  # midpoint_visuals.zip, он будет распакован в эту же папку.
+  # Каталог, в который в итоге попадёт проект (с gradlew внутри).
   PROJECT_DIR: midpoint_visuals
 
 jobs:
@@ -20,31 +19,57 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Unpack project archive (if present)
+      - name: Locate and unpack project archive
         run: |
           set -euo pipefail
 
-          if [ -f "midpoint_visuals.zip" ]; then
-            echo "ZIP найден, распаковываю в '${PROJECT_DIR}'..."
-            unzip -o -q midpoint_visuals.zip -d .
-          elif [ -d "${PROJECT_DIR}" ]; then
-            echo "ZIP не найден, но папка '${PROJECT_DIR}' уже есть в репозитории — использую её."
-          else
-            echo "::error::Не найден ни midpoint_visuals.zip, ни папка '${PROJECT_DIR}' в репозитории."
+          # Если папка с проектом уже лежит прямо в репозитории — используем её.
+          if [ -f "${PROJECT_DIR}/gradlew" ]; then
+            echo "Папка '${PROJECT_DIR}' с gradlew уже есть в репозитории — использую её как есть."
+            exit 0
+          fi
+
+          # Иначе ищем любой .zip в корне репозитория (имя может быть любым).
+          ZIP_FILE="$(find . -maxdepth 1 -iname '*.zip' -print -quit)"
+
+          if [ -z "${ZIP_FILE}" ]; then
+            echo "::error::В корне репозитория не найден ни один .zip файл, и папка '${PROJECT_DIR}/gradlew' отсутствует."
+            echo "Содержимое корня репозитория:"
+            ls -la
             exit 1
           fi
 
-          if [ ! -d "${PROJECT_DIR}" ]; then
-            echo "::error::После распаковки папка '${PROJECT_DIR}' всё ещё отсутствует."
+          echo "Найден архив: ${ZIP_FILE}"
+          echo "Распаковываю во временную папку _extracted ..."
+          rm -rf _extracted
+          mkdir -p _extracted
+          unzip -o -q "${ZIP_FILE}" -d _extracted
+
+          echo "Содержимое архива:"
+          find _extracted -maxdepth 3
+
+          # Ищем внутри распакованного архива директорию, где лежит gradlew
+          # (архив может содержать проект прямо в корне, либо во вложенной папке).
+          GRADLEW_PATH="$(find _extracted -maxdepth 4 -type f -name 'gradlew' -print -quit)"
+
+          if [ -z "${GRADLEW_PATH}" ]; then
+            echo "::error::В архиве '${ZIP_FILE}' не найден файл gradlew ни на одном уровне вложенности."
             exit 1
           fi
+
+          SRC_DIR="$(dirname "${GRADLEW_PATH}")"
+          echo "Проект найден в: ${SRC_DIR}"
+
+          rm -rf "${PROJECT_DIR}"
+          mv "${SRC_DIR}" "${PROJECT_DIR}"
+          rm -rf _extracted
 
           if [ ! -f "${PROJECT_DIR}/gradlew" ]; then
-            echo "::error::В '${PROJECT_DIR}' отсутствует gradlew — проверьте содержимое архива."
+            echo "::error::После перемещения '${PROJECT_DIR}/gradlew' всё ещё отсутствует."
             exit 1
           fi
 
-          echo "Содержимое ${PROJECT_DIR}:"
+          echo "Готово. Содержимое ${PROJECT_DIR}:"
           ls -la "${PROJECT_DIR}"
 
       - name: Setup Java 21
