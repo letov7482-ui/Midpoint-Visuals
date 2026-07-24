@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.9-SNAPSHOT'
+    id 'fabric-loom' version '1.8-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -10,13 +10,9 @@ base {
     archivesName = 'midpoint_visuals'
 }
 
-repositories {
-    maven { url = "https://terraformersmc.com" } // Репозиторий для ModMenu
-}
-
 dependencies {
     minecraft "com.mojang:minecraft:1.21.4"
-    mappings loom.officialMojangMappings() // Исправленный метод маппингов Mojang
+    mappings loom.officialMojangMappings()
     
     modImplementation "net.fabricmc:fabric-loader:0.16.9"
     modImplementation "net.fabricmc.fabric-api:fabric-api:0.115.0+1.21.4"
